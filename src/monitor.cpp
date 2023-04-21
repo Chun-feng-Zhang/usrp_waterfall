@@ -99,7 +99,7 @@ int main(int argc, char* argv[]){
         return ~0;
     }
 
-    std::atomic<bool> stop=false;
+    std::atomic<bool> stop(false);
     for(int i=0;!stop;++i)
     {
         std::cerr<<i<<std::endl;

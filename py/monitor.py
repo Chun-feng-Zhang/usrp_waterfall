@@ -59,5 +59,5 @@ def updatefig(*args):
     im.set_array(buffer)
     return im,
 
-ani = animation.FuncAnimation(fig, updatefig, interval=5, blit=True)
+ani = animation.FuncAnimation(fig, updatefig, interval=10, blit=True)
 plt.show()
