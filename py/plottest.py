@@ -7,11 +7,11 @@ data = fromfile('test.dat', dtype=np.float32).reshape((-1, 2048))
 l, m = data.shape
 print(l,m)
 
-lmod =  l - (l % 32)
+lmod =  l - (l % 256)
 print(lmod)
 
-data = data[:lmod, :].reshape(-1, 32, 2048).sum(axis=1)
+data = data[:lmod, :].reshape(256, -1, 2048).sum(axis=1)
 
-imshow(np.log(data), aspect='auto')
+imshow(np.log(data), aspect='auto', origin='lowleft')
 #plot(data.sum(axis=1))
 show()

@@ -1,4 +1,4 @@
-TARGETS=build/rt_waterfall build/monitor build/rt_wfft
+TARGETS=build/rt_waterfall build/monitor build/rt_wfft build/rt_spec
 all: $(TARGETS)
 
 #LIBS=-luhd -lboost_program_options -lboost_date_time -lboost_filesystem -lboost_serialization -lboost_thread -lboost_unit_test_framework -lboost_system  -lboost_atomic `pkg-config --libs libusb-1.0` -lboost_chrono -pthread -ldl -lfftw3f `pkg-config --libs sdl2`
@@ -29,11 +29,15 @@ build/rt_waterfall: obj/rt_waterfall.o obj/daq_queue.o obj/utils.o obj/data_proc
 obj/rt_wfft.o: src/rt_wfft.cpp |obj
 	g++ -c -o $@ $< -O3 -g $(INC)
 
-
 build/rt_wfft: obj/rt_wfft.o obj/daq_queue.o obj/utils.o obj/data_proc.o |build
 	g++ $^ -o $@ -O3 $(LIBS) -g
 
 
+obj/rt_spec.o: src/rt_spec.cpp |obj
+	g++ -c -o $@ $< -O3 -g $(INC)
+
+build/rt_spec: obj/rt_spec.o obj/daq_queue.o obj/utils.o obj/data_proc.o |build
+	g++ $^ -o $@ -O3 $(LIBS) -g
 
 obj/monitor.o: src/monitor.cpp |build
 	g++ -c -o $@ $< -O3 -g $(INC)
