@@ -28,7 +28,7 @@ void waterfall(BufQ<DataFrame>& bufq, size_t nch, size_t batch, std::atomic_bool
         auto data=bufq.fetch();
         handler_t(*data);
         if (data->count>prev_cnt+1){
-            std::cerr<<"Dropping packet"<<std::endl;
+            std::cerr<<"Dropping packet "<< data->count - prev_cnt -1<< std::endl;
         }
         
         prev_cnt=data->count;

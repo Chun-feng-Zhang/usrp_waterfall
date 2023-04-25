@@ -21,6 +21,8 @@
 #include <sys/shm.h>
 #include <thread>
 #include <fftw3.h>
+#include <cufft.h>
+#include <cufftXt.h>
 
 #include <bufq.hpp>
 #include <config.hpp>
@@ -164,7 +166,6 @@ void recv_and_proc(uhd::usrp::multi_usrp::sptr usrp,
 
     std::ofstream specfile_file;
     float* specdata = (float* ) malloc(sizeof(float)*nch);
-
     //if(!specfile_name.empty()){
     //for(int i=0; i<nch; i++){
         //specdata[i] = 0.;
@@ -397,6 +398,8 @@ int UHD_SAFE_MAIN(int argc, char* argv[])
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
+
+    //int Nthread = 128;
 
     // print the help message
     if (vm.count("help")) {

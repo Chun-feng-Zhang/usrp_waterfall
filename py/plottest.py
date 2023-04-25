@@ -13,5 +13,6 @@ print(lmod)
 data = data[:lmod, :].reshape(256, -1, 2048).sum(axis=1)
 
 imshow(np.log(data), aspect='auto', origin='lowleft')
-#plot(data.sum(axis=1))
+#plot(data.sum(axis=0))
+#xlim(1390, 1430)
 show()
