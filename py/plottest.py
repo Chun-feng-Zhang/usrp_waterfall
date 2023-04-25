@@ -11,20 +11,21 @@ rate=bw
 dt=1/bw*nch
 fmin=(fcenter-bw/2)/1e6
 fmax=(fcenter+bw/2)/1e6
+DS = 4
 
 nch = 2048
 fo = open('test.dat','r')
-data = fromfile(fo, count=1024*32*2048, dtype=np.float32).reshape((-1, 2048))
+data = fromfile(fo, count=257*DS*2048, dtype=np.float32).reshape((-1, 2048))
 l, m = data.shape
 print(l,m)
 
-lmod =  l - (l % 16)
+lmod =  l - (l % DS)
 print(lmod)
 
-data = data[:lmod, :].reshape(-1, 16, 2048).sum(axis=1)
+data = data[:lmod, :].reshape(-1, DS, 2048).sum(axis=1)
 t0 = 0
-im = plt.imshow(data.T, aspect='auto', origin='lowleft', extent=[t0, dt*16*lmod, fmin, fmax])
-t0 += dt*16*lmod
+im = plt.imshow(data.T, aspect='auto', origin='lowleft', extent=[t0, dt*DS*lmod, fmin, fmax])
+t0 += dt*DS*lmod
 #plot(data.sum(axis=0))
 #xlim(1390, 1430)
 
@@ -32,20 +33,21 @@ plt.xlabel('time (s)')
 plt.ylabel('freq (Hz)')
 plt.show()
 while True:
-    data = fromfile(fo, count=1024*32*2048, dtype=np.float32).reshape((-1, 2048))
+    data = fromfile(fo, count=257*DS*2048, dtype=np.float32).reshape((-1, 2048))
 
     l, m = data.shape
     #print(l,m)
 
-    lmod =  l - (l % 16)
+    lmod =  l - (l % DS)
     #print(lmod)
 
-    data = data[:lmod, :].reshape(-1, 16, 2048).sum(axis=1)
+    data = data[:lmod, :].reshape(-1, DS, 2048).sum(axis=1)
 
-    im = plt.imshow(data.T, aspect='auto', origin='lowleft', extent=[t0, t0+ dt*16*lmod, fmin, fmax])
+    im = plt.imshow(data.T, aspect='auto', origin='lowleft', extent=[t0, t0+ dt*DS*lmod, fmin, fmax])
     plt.xlabel('time (s)')
     plt.ylabel('freq (Hz)')
     plt.show()
+    t0 += dt*DS*lmod
     time.sleep(0)
     
 
