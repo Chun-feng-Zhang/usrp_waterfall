@@ -1,8 +1,9 @@
-#include <fftw3.h>
+#include <cufftw.h>
 #include <atomic>
 #include <utils.hpp>
 #include <data_proc.hpp>
 #include <time.h>
+
 
 void waterfall(BufQ<DataFrame>& bufq, size_t nch, size_t batch, std::atomic_bool& stop_signal_called, std::function<void(const DataFrame&)> handler_f, std::function<void(const DataFrame&)> handler_t){
     stop_signal_called=false;
@@ -25,33 +26,39 @@ void waterfall(BufQ<DataFrame>& bufq, size_t nch, size_t batch, std::atomic_bool
 
     size_t prev_cnt=0;
     clock_t t;
+        t = clock();
+
 
     for(int i=0;!stop_signal_called;++i){
+        //std::cout << "full iter time: "<< i << " : " << (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
         t = clock();
         auto data=bufq.fetch();
-        std::cout << "fetch data took: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
+        //std::cout << "fetch data took: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
         clock_t t0 = clock();
-        t = clock();
+        //t = clock();
         handler_t(*data);
-        std::cout << "handle t data: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
+        //std::cout << "handle t data: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
+        //std::cerr<<"iter: "<< i<<" count: "<<data->count<< " prev: " << prev_cnt << std::endl;
         if (data->count>prev_cnt+1){
-            std::cerr<<"Dropping packet "<< data->count - prev_cnt -1<< std::endl;
+            std::cerr<<"Dropping packet: \n"<< data->count - prev_cnt -1<< std::endl;
         }
         
         prev_cnt=data->count;
-        t = clock();
+        //t = clock();
         fftwf_execute_dft(plan, (fftwf_complex*)data->payload.data(), (fftwf_complex*)data->payload.data());
-        std::cout << "fft took: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
+        //std::cout << "fft took: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
         //t = clock();
         fft_shift(data->payload, nch, batch);
+        //std::cout << "fft shift took: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
+        
         if(i%100==0){
             std::cerr<<i<<" "<<data->count<<std::endl;
         }
         
-        t = clock();
+        //t = clock();
         handler_f(*data);
-        std::cout << "handle f data: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
-        std::cout << "full cycle took : "<< (float)(clock() -t0)/CLOCKS_PER_SEC <<std::endl;
+        //std::cout << "handle f data: "<< (float)(clock() -t)/CLOCKS_PER_SEC <<std::endl;
+        //std::cout << "full cycle took : "<< (float)(clock() -t0)/CLOCKS_PER_SEC <<std::endl;
     }
     fftwf_destroy_plan(plan);
 }

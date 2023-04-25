@@ -20,7 +20,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <thread>
-#include <fftw3.h>
+//#include <fftw3.h>
 #include <cufft.h>
 #include <cufftXt.h>
 
