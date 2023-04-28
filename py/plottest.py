@@ -13,7 +13,7 @@ dt=1/bw*nch
 fmin=(fcenter-bw/2)/1e6
 fmax=(fcenter+bw/2)/1e6
 DS = 8
-FDS = 32
+FDS = 64
 
 fo = open(sys.argv[1],'r')
 data = fromfile(fo, count=257*DS*nch, dtype=np.float32).reshape((-1, nch))
@@ -24,6 +24,7 @@ lmod =  l - (l % DS)
 print(lmod)
 
 data = data.reshape(-1,nch//FDS,FDS).sum(axis=-1)
+data -= data.mean(axis=0).T
 data = data[:lmod, :].reshape(-1, DS, nch//FDS).sum(axis=1)
 t0 = 0
 im = plt.imshow(data.T, aspect='auto', origin='lowleft', extent=[t0, dt*DS*lmod, fmin, fmax])
@@ -44,6 +45,7 @@ while True:
     #print(lmod)
 
     data = data.reshape(-1,nch//FDS,FDS).sum(axis=-1)
+    data -= data.mean(axis=0).T
     data = data[:lmod, :].reshape(-1, DS, nch//FDS).sum(axis=1)
 
     im = plt.imshow(data.T, aspect='auto', origin='lowleft', extent=[t0, t0+ dt*DS*lmod, fmin, fmax])
