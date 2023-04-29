@@ -51,12 +51,12 @@ dt=1/bw*nch
 fmin=(fcenter-bw/2)/1e6
 fmax=(fcenter+bw/2)/1e6
 
-im = plt.imshow(buffer, animated=True, aspect='auto', extent=[fmin, fmax, dt*buffer.shape[0], 0])
+im = plt.imshow(buffer[:,::-1], animated=True, aspect='auto', extent=[fmin, fmax, dt*buffer.shape[0], 0])
 plt.xlabel('freq (MHz)')
 plt.ylabel('time (sec)')
 plt.tight_layout()
 def updatefig(*args):
-    im.set_array(buffer)
+    im.set_array(buffer[:,::-1])
     return im,
 
 ani = animation.FuncAnimation(fig, updatefig, interval=10, blit=True)

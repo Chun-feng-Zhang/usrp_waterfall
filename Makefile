@@ -1,5 +1,10 @@
-TARGETS=build/rt_waterfall build/monitor build/rt_wfft build/rt_spec build/rt_gpu
+TARGETS=build/rt_waterfall build/monitor build/rt_wfft build/rt_spec build/rt_gpu build/cal2mjd
 all: $(TARGETS)
+FC = gfortran
+FFLAGS = -g -fPIC #-ffree-form
+CFLAGS = -g -Wall -W -fPIC -O3 -ffast-math -Wno-unused-result
+LIBCMD = -shared
+USRP=`pwd`
 
 #LIBS=-luhd -lboost_program_options -lboost_date_time -lboost_filesystem -lboost_serialization -lboost_thread -lboost_unit_test_framework -lboost_system  -lboost_atomic `pkg-config --libs libusb-1.0` -lboost_chrono -pthread -ldl -lfftw3f `pkg-config --libs sdl2`
 #INC=-I ./include `pkg-config --cflags sdl2`
@@ -27,6 +32,29 @@ obj/utils.o: src/utils.cpp include/utils.hpp |obj
 obj/monitor.o: src/monitor.cpp |build
 	g++ -c -o $@ $< -O3 -g $(CPUINC)
 
+obj/swap_bytes.o:src/swap_bytes.c
+	gcc  -fPIC -c src/swap_bytes.c -o obj/swap_bytes.o
+obj/send_stuff.o:src/send_stuff.c obj/swap_bytes.o
+	gcc  -c -fPIC src/send_stuff.c obj/swap_bytes.o -o obj/send_stuff.o
+obj/filheader.o:src/filheader.c obj/send_stuff.o |build
+	gcc  -c -fPIC src/filheader.c obj/send_stuff.o obj/swap_bytes.o  -o obj/filheader.o 
+obj/cldj.o: src/slalib/cldj.c
+	cc -c -fPIC src/slalib/cldj.c -o obj/cldj.o -lf2c -lm
+obj/cal2mjd.o: src/cal2mjd.cpp  |obj
+	g++ -c -o $@ src/cal2mjd.cpp   -O3 -g -lf2c -lm
+
+slalib: libsla.so
+	cd src/slalib ; $(FC) -o sla_test sla_test.f -fno-second-underscore -L../../obj -lsla
+	src/slalib/sla_test
+
+libsla.so:src/slalib/*.f
+	cd src/slalib ; $(FC) $(FFLAGS) -fno-second-underscore -c -I. *.f *.F
+	rm src/slalib/sla_test.o
+	cd src/slalib ; $(FC) $(LIBCMD) -o ../../obj/libsla.so -fno-second-underscore *.o
+
+build/cal2mjd:  obj/cal2mjd.o |obj
+	g++ -o $@ obj/cal2mjd.o obj/cldj.o  # -lm -lf2c #-Lobj -lsla -lgfortran #-lf -lg2c -lfortran
+
 build/monitor: obj/monitor.o |build
 	g++ $^ -o $@ -O3 $(CPULIBS) -g
 
@@ -39,19 +67,19 @@ build/rt_waterfall: obj/rt_waterfall.o obj/daq_queue.o obj/utils.o obj/data_proc
 obj/rt_wfft.o: src/rt_wfft.cpp |obj
 	g++ -c -o $@ $< -O3 -g $(CPUINC)
 
-build/rt_wfft: obj/rt_wfft.o obj/daq_queue.o obj/utils.o obj/data_proc.o |build
+build/rt_wfft: obj/rt_wfft.o obj/daq_queue.o obj/utils.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o |build
 	g++ $^ -o $@ -O3 $(CPULIBS) -g
 
 obj/rt_spec.o: src/rt_spec.cpp |obj
 	g++ -c -o $@ $< -O3 -g $(CPUINC)
 
-build/rt_spec: obj/rt_spec.o obj/daq_queue.o obj/utils.o obj/data_proc.o |build
+build/rt_spec: obj/rt_spec.o obj/daq_queue.o obj/utils.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o |build
 	g++ $^ -o $@ -O3 $(CPULIBS) -g
 
 obj/rt_gpu.o: src/rt_gpu.cpp |obj
 	nvcc -c -o $@ $< -O3 -g $(GPUINC)
 
-build/rt_gpu: obj/rt_gpu.o obj/daq_queue.o obj/utils.o obj/GPU_proc.o |build
+build/rt_gpu: obj/rt_gpu.o obj/daq_queue.o obj/utils.o obj/GPU_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o |build
 	nvcc $^ -o $@ -O3 $(GPULIBS) -g
 
 obj: 
