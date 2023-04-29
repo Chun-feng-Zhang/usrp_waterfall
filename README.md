@@ -32,6 +32,13 @@ sudo apt install libfftw3-dev
 sudo apt install python3-sysv-ipc
 ```
 
+5. c++20
+```
+sudo apt install gcc-10*
+sudo apt install g++-10*
+sudo apt install libstdc++-10*
+
+```
 ## Building
 ```
 make clean&&make

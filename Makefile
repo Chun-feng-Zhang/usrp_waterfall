@@ -1,4 +1,4 @@
-TARGETS=build/rt_waterfall build/monitor build/rt_wfft build/rt_spec build/rt_gpu build/cal2mjd
+TARGETS=build/rt_waterfall build/monitor build/rt_wfft build/rt_spec build/rt_gpu build/cal2mjd build/now2mjd build/rt_backend
 all: $(TARGETS)
 FC = gfortran
 FFLAGS = -g -fPIC #-ffree-form
@@ -42,6 +42,9 @@ obj/cldj.o: src/slalib/cldj.c
 	cc -c -fPIC src/slalib/cldj.c -o obj/cldj.o -lf2c -lm
 obj/cal2mjd.o: src/cal2mjd.cpp  |obj
 	g++ -c -o $@ src/cal2mjd.cpp   -O3 -g -lf2c -lm
+obj/now2mjd.o: src/now2mjd.cpp  |obj
+	g++-10 -c -o $@ src/now2mjd.cpp   -O3 -g -lf2c -lm --std=c++20
+
 
 slalib: libsla.so
 	cd src/slalib ; $(FC) -o sla_test sla_test.f -fno-second-underscore -L../../obj -lsla
@@ -52,8 +55,10 @@ libsla.so:src/slalib/*.f
 	rm src/slalib/sla_test.o
 	cd src/slalib ; $(FC) $(LIBCMD) -o ../../obj/libsla.so -fno-second-underscore *.o
 
-build/cal2mjd:  obj/cal2mjd.o |obj
+build/cal2mjd:  obj/cal2mjd.o obj/cldj.o |obj
 	g++ -o $@ obj/cal2mjd.o obj/cldj.o  # -lm -lf2c #-Lobj -lsla -lgfortran #-lf -lg2c -lfortran
+build/now2mjd:  obj/now2mjd.o obj/cldj.o |obj
+	g++ -o $@ obj/now2mjd.o obj/cldj.o  # -lm -lf2c #-Lobj -lsla -lgfortran #-lf -lg2c -lfortran
 
 build/monitor: obj/monitor.o |build
 	g++ $^ -o $@ -O3 $(CPULIBS) -g
@@ -80,6 +85,12 @@ obj/rt_gpu.o: src/rt_gpu.cpp |obj
 	nvcc -c -o $@ $< -O3 -g $(GPUINC)
 
 build/rt_gpu: obj/rt_gpu.o obj/daq_queue.o obj/utils.o obj/GPU_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o |build
+	nvcc $^ -o $@ -O3 $(GPULIBS) -g
+
+obj/rt_backend.o: src/rt_backend.cpp |obj
+	nvcc -c -o $@ $< -O3 -g $(GPUINC)
+
+build/rt_backend: obj/rt_backend.o obj/daq_queue.o obj/utils.o obj/GPU_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
 	nvcc $^ -o $@ -O3 $(GPULIBS) -g
 
 obj: 

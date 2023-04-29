@@ -63,7 +63,7 @@
 
 /* - */
 /*  Month lengths in days */
-//printf("in fortran routine: year %d month %d day %d", iy, im, id);
+//printf("in fortran routine: year %ld month %ld day %ld", *iy, *im, *id);
 /*  Preset status. */
     *j = 0;
 /*  Validate year. */
