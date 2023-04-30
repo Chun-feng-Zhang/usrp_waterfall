@@ -32,7 +32,7 @@ sudo apt install libfftw3-dev
 sudo apt install python3-sysv-ipc
 ```
 
-5. c++20
+5. c++20 unnecessary but may help
 ```
 sudo apt install gcc-10*
 sudo apt install g++-10*
