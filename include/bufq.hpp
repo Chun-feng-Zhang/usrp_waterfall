@@ -10,6 +10,7 @@
 #include <thread>
 #include <initializer_list>
 #include <atomic>
+#include <chrono>
 template <typename T> class BufQ
 {
   public:
@@ -58,6 +59,7 @@ template <typename T> class BufQ
         waiting.store (true);
         std::unique_lock<std::mutex> lk (mx);
         cv.wait (lk, [&, this] { return !this->filled_q.empty (); });
+        //cv.wait_for (lk, std::chrono::milliseconds(50), [&, this] { return !this->filled_q.empty (); } );
         waiting.store (false);
         if (proc_buf != nullptr)
             {
