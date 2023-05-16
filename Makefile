@@ -1,4 +1,4 @@
-TARGETS=build/rt_waterfall build/monitor build/rt_wfft build/rt_spec build/rt_gpu build/cal2mjd build/rt_backend build/rt_cpubackend #build/now2mjd 
+TARGETS=build/rt_waterfall build/monitor build/rt_wfft build/rt_spec  build/cal2mjd build/rt_cpubackend #build/rt_gpu  #build/rt_backend  #build/now2mjd 
 all: $(TARGETS)
 FC = gfortran
 FFLAGS = -g -fPIC #-ffree-form
@@ -81,6 +81,12 @@ obj/rt_spec.o: src/rt_spec.cpp |obj
 build/rt_spec: obj/rt_spec.o obj/daq_queue.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
 	g++ $^ -o $@ -O3 $(CPULIBS) -g
 
+obj/rt_cpubackend.o: src/rt_cpubackend.cpp |obj
+	g++ -c -o $@ $< -O3 -g $(CPUINC)
+
+build/rt_cpubackend: obj/rt_cpubackend.o obj/daq_queue.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
+	g++ $^ -o $@ -O3 $(CPULIBS) -g
+
 obj/rt_gpu.o: src/rt_gpu.cpp |obj
 	nvcc -c -o $@ $< -O3 -g $(GPUINC)
 
@@ -93,11 +99,6 @@ obj/rt_backend.o: src/rt_backend.cpp |obj
 build/rt_backend: obj/rt_backend.o obj/daq_queue.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
 	nvcc $^ -o $@ -O3 $(GPULIBS) -g
 
-obj/rt_cpubackend.o: src/rt_cpubackend.cpp |obj
-	g++ -c -o $@ $< -O3 -g $(GPUINC)
-
-build/rt_cpubackend: obj/rt_cpubackend.o obj/daq_queue.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
-	g++ $^ -o $@ -O3 $(GPULIBS) -g
 
 obj: 
 	mkdir -p obj

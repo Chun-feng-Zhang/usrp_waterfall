@@ -20,9 +20,9 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <thread>
-//#include <fftw3.h>
-#include <cufft.h>
-#include <cufftXt.h>
+#include <fftw3.h>
+//#include <cufft.h>
+//#include <cufftXt.h>
 
 #include <bufq.hpp>
 #include <config.hpp>
