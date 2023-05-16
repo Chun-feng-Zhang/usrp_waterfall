@@ -67,3 +67,6 @@ The other one option is to invoke a more pretty (but relatively slower) pythoner
 ```
 ./py/monitor.py
 ```
+
+NOTE on the filterbank files generated
+the band may be inverted, try using --invert in PRESTO commands.
