@@ -13,7 +13,7 @@ CPULIBS=-luhd -lboost_program_options -lboost_date_time -lboost_filesystem -lboo
 
 GPULIBS=-luhd -lboost_program_options -lboost_date_time -lboost_filesystem -lboost_serialization -lboost_thread -lboost_unit_test_framework -lboost_system  -lboost_atomic `pkg-config --libs libusb-1.0` -lboost_chrono -lpthread -ldl `pkg-config --libs libudev` -latomic -lrt -lcufft -lcufftw `pkg-config --libs sdl2` -L/usr/local/cuda/lib64/
 
-CPUINC=-I ./include `pkg-config --cflags sdl2`
+CPUINC=-I ./include -I /usr/local/include/uhd -L /usr/local/lib/ `pkg-config --cflags sdl2`
 
 GPUINC=-I ./include -I /usr/local/cuda/include/ `pkg-config --cflags sdl2`
 
@@ -67,37 +67,37 @@ obj/rt_waterfall.o: src/rt_waterfall.cpp |obj
 	g++ -c -o $@ $< -O3 -g $(CPUINC)
 
 build/rt_waterfall: obj/rt_waterfall.o obj/daq_queue.o obj/data_proc.o obj/cldj.o |build
-	g++ $^ -o $@ -O3 $(CPULIBS) -g
+	g++ $^ -o $@ -O3 $(CPULIBS) $(CPUINC) -g
 
 obj/rt_wfft.o: src/rt_wfft.cpp |obj
-	g++ -c -o $@ $< -O3 -g $(CPUINC)
+	g++ -c -o $@ $< -O3 -g $(CPULIBS) $(CPUINC)
 
 build/rt_wfft: obj/rt_wfft.o obj/daq_queue.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
-	g++ $^ -o $@ -O3 $(CPULIBS) -g
+	g++ $^ -o $@ -O3 $(CPULIBS) $(CPUINC)-g
 
 obj/rt_spec.o: src/rt_spec.cpp |obj
-	g++ -c -o $@ $< -O3 -g $(CPUINC)
+	g++ -c -o $@ $< -O3 -g $(CPULIBS) $(CPUINC)
 
 build/rt_spec: obj/rt_spec.o obj/daq_queue.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
-	g++ $^ -o $@ -O3 $(CPULIBS) -g
+	g++ $^ -o $@ -O3 $(CPULIBS) $(CPUINC) -g
 
 obj/rt_cpubackend.o: src/rt_cpubackend.cpp |obj
-	g++ -c -o $@ $< -O3 -g $(CPUINC)
+	g++ -c -o $@ $< -O3 -g $(CPULIBS) $(CPUINC)
 
 build/rt_cpubackend: obj/rt_cpubackend.o obj/daq_queue.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
-	g++ $^ -o $@ -O3 $(CPULIBS) -g
+	g++ $^ -o $@ -O3 $(CPUINC) $(CPULIBS) -g
 
 obj/rt_gpu.o: src/rt_gpu.cpp |obj
 	nvcc -c -o $@ $< -O3 -g $(GPUINC)
 
 build/rt_gpu: obj/rt_gpu.o obj/daq_queue.o obj/GPU_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
-	nvcc $^ -o $@ -O3 $(GPULIBS) -g
+	nvcc $^ -o $@ -O3 $(GPUINC) $(GPULIBS) -g
 
 obj/rt_backend.o: src/rt_backend.cpp |obj
-	nvcc -c -o $@ $< -O3 -g $(GPUINC)
+	nvcc -c -o $@ $< -O3 -g $(GPUINC) $(GPULIBS)
 
 build/rt_backend: obj/rt_backend.o obj/daq_queue.o obj/data_proc.o obj/filheader.o obj/send_stuff.o obj/swap_bytes.o obj/cldj.o |build
-	nvcc $^ -o $@ -O3 $(GPULIBS) -g
+	nvcc $^ -o $@ -O3 $(GPUINC) $(GPULIBS) -g
 
 
 obj: 
